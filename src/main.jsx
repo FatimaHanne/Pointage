@@ -11,6 +11,7 @@ import AddPointage from "./pages/add-pointage/AddPointage"
 import Pointer from "./pages/pointer/Pointer"
 import { Toaster } from "react-hot-toast";
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 
 // import PrivateRoute from './components/PrivateRoute';
 import Connexion from './components/Connexion';

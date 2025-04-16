@@ -12,11 +12,11 @@ export default function Inscription() {
         if(data.motDePasse !== data.motDePasseConfirmation){
           toast.error("Les mots de passe ne sont pas identiques");
         }else {
-         axios.get(`http://localhost:3000/utilisateurs?mailUtilisateur=${data.mailUtilisateur}`).then((res) => {
+         axios.get(`http://localhost:3000/admin?mailUtilisateur=${data.mailUtilisateur}`).then((res) => {
            if(res.data.length > 0){
              toast.error("Cette adresse email est déjà utilisée");
            }else{
-             axios.post("http://localhost:3000/utilisateurs", data).then((res)=>{
+             axios.post("http://localhost:3000/admin", data).then((res)=>{
                console.log(res);
                toast.success("Inscription réussie");
                // Rediriger vers la page de connexion après inscription réussie
@@ -49,6 +49,7 @@ export default function Inscription() {
                           { required: "Veuillez saisir un nom", minLength:{value:5, 
                         message:"Veuillez saisir un nom de plus de 5 caractères" } })}
                     />
+                 
                     <TextField id="filled-basic" label="Veuillez saisir votre adresse email" variant="outlined" fullWidth size="small"
                     type="email"
                     {...register("mailUtilisateur", 

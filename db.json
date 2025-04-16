@@ -42,7 +42,8 @@
       "phone": "770574503",
       "date": "2025-05-06",
       "entree": "08:10:29",
-      "sortie": "16:13:57"
+      "sortie": "16:13:57",
+       "role": ""
     },
     {
       "id": "cabe",
@@ -72,7 +73,44 @@
       "phone": "770574503",
       "date": "2025-04-14",
       "entree": "11:44:31"
+    },
+    {
+      "id": "c89c",
+      "nom": "Fatim Hanne",
+      "phone": "770574503",
+      "date": "2025-04-16",
+      "entree": "10:07:34"
+    },
+    {
+      "id": "12a7",
+      "nom": "Fatimata Gano",
+      "phone": "777059966",
+      "date": "2025-04-16",
+      "entree": "10:27:22"
+    },
+    {
+      "id": "92e5",
+      "nom": "Daba Sarr",
+      "phone": "778897035",
+      "date": "2025-04-16",
+      "entree": "10:27:33"
     }
   ],
-  "admin": []
+  "admin": [
+    {
+      "id": "9480",
+      "nomUtilisateur": "Rama GUEYU",
+      "mailUtilisateur": "deye@fggfug.com",
+      "motDePasse": "1234567",
+      "motDePasseConfirmation": "1234567"
+    },
+    {
+      "id": "2e12",
+      "nomUtilisateur": "Fatima hanne",
+      "phone": "",
+      "mailUtilisateur": "fatimagano21@gmail.com",
+      "motDePasse": "123456789",
+      "motDePasseConfirmation": "123456789"
+    }
+  ]
 }
