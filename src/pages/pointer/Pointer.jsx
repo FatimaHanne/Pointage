@@ -16,7 +16,7 @@ export default function Pointer() {
   } = useForm();
 
   const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
-  const heureNow = new Date().toLocaleTimeString(); // HH:MM:SS
+  // const heureNow = now.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }); // Donne "15:42"
 
   const fetchPointages = () => {
     axios.get(`http://localhost:3000/pointages?date=${today}`).then((res) => {
@@ -29,71 +29,138 @@ export default function Pointer() {
   useEffect(() => {
     fetchPointages();
   }, []);
-  const onSubmit = ({ phone }) => {
-    const now = new Date();
-    const heureNow = now.toLocaleTimeString("fr-FR", { hour12: false });
-  
-    // On extrait les heures et minutes
-    const heures = now.getHours();
-    const minutes = now.getMinutes();
-  
-    axios.get(`http://localhost:3000/ajout-pointeur?phone=${phone}`).then(res => {
-      if (res.data.length === 0) {
-        toast.error("L'utilisateur n'existe pas !");
-      } else {
-        const pointeur = res.data[0];
-  
-        axios.get(`http://localhost:3000/pointages?phone=${phone}&date=${today}`).then((res) => {
-          const pointage = res.data[0];
-  
-          // 🎯 Vérifier le créneau horaire
-          const currentTime = now.getHours() * 60 + now.getMinutes(); // temps en minutes
-          const morningStart = 8 * 60;   //  => 480 minutes
-          const morningEnd = 12 * 60;    // => 720 minutes
-          const eveningStart = 15 * 60;  
-          const eveningEnd = 18 * 60;    
 
-          const isInMorningWindow = currentTime >= morningStart && currentTime <= morningEnd;
-          const isInEveningWindow = currentTime >= eveningStart && currentTime <= eveningEnd;
+  const onSubmit = async ({ phone }) => {
+    const now = new Date(); // <== à ne surtout pas oublier !
+    const heureNow = now.toLocaleTimeString("fr-FR", { hour12: false });
+    const currentTime = now.getHours() * 60 + now.getMinutes();
+    const morningStart = 8 * 60;
+    const morningEnd = 12 * 60;
+    const eveningStart = 15 * 60;
+    const eveningEnd = 18 * 60;
+  
+    try {
+      const [resPointeur, resAdmin] = await Promise.all([
+        axios.get(`http://localhost:3000/ajout-pointeur?phone=${phone}`),
+        axios.get(`http://localhost:3000/admin?phone=${phone}`)
+      ]);
+  
+      const isAdmin = resAdmin.data.length > 0;
+      const pointeur = resPointeur.data[0];
+  
+      if (!pointeur) {
+        toast.error("L'utilisateur n'existe pas !");
+        return;
+      }
+  
+      const nomComplet = `${pointeur.PrenomPointeur} ${pointeur.NomPointeur}` + (isAdmin ? " (admin)" : "");
+  
+      const resPointage = await axios.get(`http://localhost:3000/pointages?phone=${phone}&date=${today}`);
+      const pointage = resPointage.data[0];
+  
+      const isInMorningWindow = currentTime >= morningStart && currentTime <= morningEnd;
+      const isInEveningWindow = currentTime >= eveningStart && currentTime <= eveningEnd;
+  
+      if (!pointage) {
+        if (isInMorningWindow) {
+          const newPointage = {
+            nom: nomComplet,
+            phone: pointeur.phone,
+            date: today,
+            entree: heureNow,
+            role: isAdmin ? "admin" : "pointeur"
+          };
+          await axios.post("http://localhost:3000/pointages", newPointage);
+          toast.success("Entrée enregistrée");
+        } else {
+          toast.error("L’entrée est autorisée uniquement de 8h à 12h");
+        }
+      } else if (!pointage.sortie) {
+        if (isInEveningWindow) {
+          await axios.patch(`http://localhost:3000/pointages/${pointage.id}`, {
+            sortie: heureNow
+          });
+          toast.success("Sortie enregistrée");
+        } else {
+          toast.error("La sortie est autorisée uniquement de 15h à 18h");
+        }
+      } else {
+        toast.error("Vous avez déjà pointé l'entrée et la sortie aujourd'hui.");
+      }
+  
+      fetchPointages();
+      reset();
+    } catch (error) {
+      console.error("Erreur lors du pointage :", error);
+      toast.error("Une erreur s'est produite.");
+    }
+  };
+  
+  // const onSubmit = ({ phone }) => {
+  //   const now = new Date();
+  //   const heureNow = now.toLocaleTimeString("fr-FR", { hour12: false });
+  
+  //   // On extrait les heures et minutes
+  //   const heures = now.getHours();
+  //   const minutes = now.getMinutes();
+  
+  //   axios.get(`http://localhost:3000/ajout-pointeur?phone=${phone}`).then(res => {
+  //     if (res.data.length === 0) {
+  //       toast.error("L'utilisateur n'existe pas !");
+  //     } else {
+  //       const pointeur = res.data[0];
+  
+  //       axios.get(`http://localhost:3000/pointages?phone=${phone}&date=${today}`).then((res) => {
+  //         const pointage = res.data[0];
+  
+  //         // 🎯 Vérifier le créneau horaire
+  //         const currentTime = now.getHours() * 60 + now.getMinutes(); // temps en minutes
+  //         const morningStart = 8 * 60;   //  => 480 minutes
+  //         const morningEnd = 12 * 60;    // => 720 minutes
+  //         const eveningStart = 15 * 60;  
+  //         const eveningEnd = 18 * 60;    
+
+  //         const isInMorningWindow = currentTime >= morningStart && currentTime <= morningEnd;
+  //         const isInEveningWindow = currentTime >= eveningStart && currentTime <= eveningEnd;
           
 
-          if (!pointage) {
-            // Entrée
-            if (isInMorningWindow) {
-              const newPointage = {
-                nom: `${pointeur.PrenomPointeur} ${pointeur.NomPointeur}`, // 👈 nom complet
-                phone: pointeur.phone,
-                date: today,
-                entree: heureNow
-              };
-              axios.post("http://localhost:3000/pointages", newPointage).then(() => {
-                toast.success("Entrée enregistrée");
-                fetchPointages();
-                reset();
-              });
-            } else {
-              toast.error("L’entrée est autorisée uniquement de 8h à 12h");
-            }
-          } else if (!pointage.sortie) {
-            // Sortie
-            if (isInEveningWindow) {
-              axios.patch(`http://localhost:3000/pointages/${pointage.id}`, {
-                sortie: heureNow
-              }).then(() => {
-                toast.success("Sortie enregistrée");
-                fetchPointages();
-                reset();
-              });
-            } else {
-              toast.error("La sortie est autorisée uniquement de 15h à 18h");
-            }
-          } else {
-            toast.error("Vous avez déjà pointé l'entrée et la sortie aujourd'hui.");
-          }
-        });
-      }
-    });
-  };
+  //         if (!pointage) {
+  //           // Entrée
+  //           if (isInMorningWindow) {
+  //             const newPointage = {
+  //               nom: `${pointeur.PrenomPointeur} ${pointeur.NomPointeur}`, // 👈 nom complet
+  //               phone: pointeur.phone,
+  //               date: today,
+  //               entree: heureNow
+  //             };
+  //             axios.post("http://localhost:3000/pointages", newPointage).then(() => {
+  //               toast.success("Entrée enregistrée");
+  //               fetchPointages();
+  //               reset();
+  //             });
+  //           } else {
+  //             toast.error("L’entrée est autorisée uniquement de 8h à 12h");
+  //           }
+  //         } else if (!pointage.sortie) {
+  //           // Sortie
+  //           if (isInEveningWindow) {
+  //             axios.patch(`http://localhost:3000/pointages/${pointage.id}`, {
+  //               sortie: heureNow
+  //             }).then(() => {
+  //               toast.success("Sortie enregistrée");
+  //               fetchPointages();
+  //               reset();
+  //             });
+  //           } else {
+  //             toast.error("La sortie est autorisée uniquement de 15h à 18h");
+  //           }
+  //         } else {
+  //           toast.error("Vous avez déjà pointé l'entrée et la sortie aujourd'hui.");
+  //         }
+  //       });
+  //     }
+  //   });
+  // };
   
   return (
     <>
@@ -135,16 +202,33 @@ export default function Pointer() {
       </AppBar>
 
     <Stack alignItems="center" justifyContent="center" width="100%" minHeight="100vh" sx={{  background: "linear-gradient(135deg, #E3F2FD, #ffffff)", padding: 4 }}>
-      <Stack spacing={4} direction="column" alignItems="flex-start">
+    <Stack direction={{ xs: "column", md: "row" }} 
+          spacing={4}
+          alignItems="flex-start"
+          justifyContent="center"
+          width="100%"
+          minHeight="100vh"
+          sx={{
+            background: "linear-gradient(135deg, #E3F2FD, #ffffff)",
+            paddingTop: "100px",
+            overflowX: "auto",
+            flexWrap: "nowrap",
+          }} >
         {/* Formulaire */}
         <Box
           width={400}
           sx={{
-            backgroundColor: "#fff",
-            padding: 5,
-            border: "1px solid rgb(134, 177, 221)",
-            boxShadow: "0px 0px 10px rgba(9, 11, 14, 0.2)",
-            borderRadius: 2
+            flex: 1,
+          maxWidth: 500,
+          padding: 4,
+          borderRadius: 2,
+          border: "1px solid #ddd",
+          maxHeight: "80vh",
+          overflowY: "auto",
+          width: "100%",
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
           }}
         >
           <form onSubmit={handleSubmit(onSubmit)}>
@@ -176,14 +260,19 @@ export default function Pointer() {
 
         {/* Liste des pointages */}
         <Box
-          width={400}
+          
           sx={{
+            flex: 1,
+            maxWidth: 500,
             padding: 4,
             borderRadius: 2,
             border: "1px solid #ddd",
-            // boxShadow: "0px 0px 10px rgba(0,0,0,0.05)",
             maxHeight: "80vh",
-            overflowY: "auto"
+            overflowY: "auto",
+            width: "100%",
+            display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
           }}
         >
           <Typography variant="h6" fontWeight="bold" marginBottom={2}>
@@ -196,10 +285,13 @@ export default function Pointer() {
             pointages.map((p) => (
               <Box key={p.id} mb={2} p={2} sx={{ backgroundColor: "#fff", borderRadius: 1, border: "1px solid #e0e0e0" }}>
                 {/* <Typography><strong>Nom :</strong> {p.nom}</Typography> */}
-                <Typography><strong>Nom :</strong> {p.nom || "—"}</Typography>
+                <Typography>
+                  <strong>Nom :</strong> {p.nom} {p.role === "admin" && <span style={{ color: "red" }}></span>}
+                </Typography>
                 <Typography><strong>Téléphone :</strong> {p.phone}</Typography>
-                <Typography><strong>Entrée :</strong> {p.entree || "—"}</Typography>
-                <Typography><strong>Sortie :</strong> {p.sortie || "—"}</Typography>
+                <Typography color={p.entree ? "green" : "gray"}><strong>Entrée :</strong> {p.entree || "—"}</Typography>
+                <Typography color={p.sortie ? "blue" : "gray"}><strong>Sortie :</strong> {p.sortie || "—"}</Typography>
+  
               </Box>
             ))
           )}

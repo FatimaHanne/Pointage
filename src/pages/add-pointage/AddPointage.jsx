@@ -7,7 +7,6 @@ import { useNavigate } from "react-router-dom";
 // import ListPointeur from "./components/ListPointeur"
 
 export default function AddPointage() {
-  
   const user = JSON.parse(localStorage.getItem("pointeur"));
   const navigate = useNavigate();
   const [employés, setEmployés] = useState([]);
@@ -19,13 +18,12 @@ export default function AddPointage() {
     formState: { errors },
   } = useForm();
 
-  // Charger la liste des employés au montage
-  useEffect(() => {
-    if (!localStorage.getItem('add-pointage')) {
-      navigate('/connexion')
-    }
-    fetchEmployés();
-  }, []);
+   useEffect(() => {
+      if (!localStorage.getItem('admin')) {
+        navigate('/connexion')
+      }
+      fetchEmployés();
+    }, []);
 
   const fetchEmployés = () => {
     axios.get("http://localhost:3000/ajout-pointeur").then((res) => {
@@ -33,32 +31,39 @@ export default function AddPointage() {
     });
   };
 
-  const onSubmit = (data) => {
-    console.log("submit", data);
-    axios
-      .get(`http://localhost:3000/ajout-pointeur?phone=${data.phone}`)
-      .then((res) => {
-        if (res.data.length > 0) {
-          toast.error("Ce numéro est déjà enregistré");
-        } else {
-          axios
-            .post("http://localhost:3000/ajout-pointeur", data)
-            .then((res) => {
-              toast.success("Ajout effectué avec succès");
-              reset();
-              fetchEmployés(); // mise à jour de la liste
-                // setEmployés((prev) => [...prev, res.data]); // Ajouter l'employé ajouté à la liste existante
-                navigate("/Pointer");
-            
-            })
-            .catch((err) => {
-              console.error(err);
-              toast.error("Une erreur est survenue");
-            });
-        }
-      });
+  const onSubmit = async (data) => {
+    try {
+      // 1. Récupère les utilisateurs de la base admin
+      const resAdmin = await axios.get("http://localhost:3000/admin");
+      
+      // 2. Vérifie si le numéro entré existe dans la base admin
+      const adminMatch = resAdmin.data.find(
+        (admin) => admin.numeroUtilisateur === data.phone
+      );
+  
+      const role = adminMatch ? "admin" : "etudiant";
+      const pointeurAvecRole = { ...data, role };
+  
+      // 3. Vérifie si ce numéro existe déjà dans la base de pointage
+      const doublon = await axios.get(`http://localhost:3000/ajout-pointeur?phone=${data.phone}`);
+      if (doublon.data.length > 0) {
+        toast.error("Ce numéro est déjà enregistré");
+        return;
+      }
+  
+      // 4. Ajoute le pointeur avec le rôle correct
+      await axios.post("http://localhost:3000/ajout-pointeur", pointeurAvecRole);
+      toast.success("Ajout effectué avec succès");
+      reset();
+      fetchEmployés();
+      navigate("/Pointer");
+    } catch (err) {
+      console.error(err);
+      toast.error("Une erreur est survenue");
+    }
   };
-
+  
+  
   return (
     <Stack
       alignItems="center"

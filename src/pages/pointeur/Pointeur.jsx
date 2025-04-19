@@ -75,7 +75,6 @@ const Pointeur = () => {
   const handleListe = () => {
     navigate("/list-pointage");
   };
-
         return (
           <div className="position-relative bg-light">
             {/* Vecteurs en haut */}

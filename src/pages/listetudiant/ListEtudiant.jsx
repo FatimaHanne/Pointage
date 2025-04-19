@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom';
 import {
   Stack,
   Typography,
@@ -10,13 +10,18 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Button
+  Button,
+  TextField
 } from '@mui/material';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 
 export default function ListEtudiant() {
   const [employés, setEmployés] = useState([]);
-  const navigate = useNavigate()
+  const [editingId, setEditingId] = useState(null);
+  const [editData, setEditData] = useState({});
+  const navigate = useNavigate();
+
   const fetchEmployés = async () => {
     try {
       const res = await axios.get("http://localhost:3000/ajout-pointeur");
@@ -26,11 +31,57 @@ export default function ListEtudiant() {
     }
   };
 
+  const handleDelete = async (id) => {
+    const confirm = window.confirm("Voulez-vous vraiment supprimer ce pointeur ?");
+    if (confirm) {
+      try {
+        await axios.delete(`http://localhost:3000/ajout-pointeur/${id}`);
+        setEmployés((prev) => prev.filter((emp) => emp.id !== id));
+        toast.success("Pointeur supprimé avec succès !");
+      } catch (error) {
+        console.error("Erreur lors de la suppression :", error);
+        toast.error("Échec de la suppression !");
+      }
+    }
+  };
+
+  const handleEdit = (employé) => {
+    setEditingId(employé.id);
+    setEditData({
+      NomPointeur: employé.NomPointeur,
+      PrenomPointeur: employé.PrenomPointeur,
+      phone: employé.phone,
+    });
+  };
+
+  const handleEditChange = (e) => {
+    setEditData({ ...editData, [e.target.name]: e.target.value });
+  };
+
+  const handleSave = async (id) => {
+    try {
+      const updated = {
+        ...employés.find(emp => emp.id === id),
+        ...editData
+      };
+      await axios.put(`http://localhost:3000/ajout-pointeur/${id}`, updated);
+      setEmployés((prev) =>
+        prev.map((emp) => (emp.id === id ? updated : emp))
+      );
+      toast.success("Pointeur mis à jour !");
+      setEditingId(null);
+    } catch (error) {
+      console.error("Erreur de mise à jour :", error);
+      toast.error("Erreur lors de la mise à jour !");
+    }
+  };
+
   useEffect(() => {
     if (!localStorage.getItem('admin')) {
-      navigate('/connexion')
+      navigate('/connexion');
+    } else {
+      fetchEmployés();
     }
-    fetchEmployés();
   }, []);
 
   return (
@@ -58,6 +109,7 @@ export default function ListEtudiant() {
                 <TableCell><strong>Nom</strong></TableCell>
                 <TableCell><strong>Prénom</strong></TableCell>
                 <TableCell><strong>Numéro</strong></TableCell>
+                <TableCell><strong>Rôle</strong></TableCell>
                 <TableCell><strong>Actions</strong></TableCell>
               </TableRow>
             </TableHead>
@@ -65,24 +117,73 @@ export default function ListEtudiant() {
               {employés.map((employé) => (
                 <TableRow key={employé.id}>
                   <TableCell>{employé.id}</TableCell>
-                  <TableCell>{employé.NomPointeur}</TableCell>
-                  <TableCell>{employé.PrenomPointeur}</TableCell>
-                  <TableCell>{employé.phone}</TableCell>
+                  <TableCell>
+                    {editingId === employé.id ? (
+                      <TextField
+                        name="NomPointeur"
+                        value={editData.NomPointeur}
+                        onChange={handleEditChange}
+                        size="small"
+                      />
+                    ) : (
+                      employé.NomPointeur
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {editingId === employé.id ? (
+                      <TextField
+                        name="PrenomPointeur"
+                        value={editData.PrenomPointeur}
+                        onChange={handleEditChange}
+                        size="small"
+                      />
+                    ) : (
+                      employé.PrenomPointeur
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {editingId === employé.id ? (
+                      <TextField
+                        name="phone"
+                        value={editData.phone}
+                        onChange={handleEditChange}
+                        size="small"
+                      />
+                    ) : (
+                      employé.phone
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <strong style={{ color: employé.role === "admin" ? "green" : "blue" }}>
+                      {employé.role}
+                    </strong>
+                  </TableCell>
                   <TableCell>
                     <Stack direction="row" spacing={1}>
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        color="primary"
-                        onClick={() => console.log("Modifier", employé.id)}
-                      >
-                        Modifier
-                      </Button>
+                      {editingId === employé.id ? (
+                        <Button
+                          variant="contained"
+                          size="small"
+                          color="success"
+                          onClick={() => handleSave(employé.id)}
+                        >
+                          Enregistrer
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          color="primary"
+                          onClick={() => handleEdit(employé)}
+                        >
+                          Modifier
+                        </Button>
+                      )}
                       <Button
                         variant="outlined"
                         size="small"
                         color="error"
-                        onClick={() => console.log("Supprimer", employé.id)}
+                        onClick={() => handleDelete(employé.id)}
                       >
                         Supprimer
                       </Button>

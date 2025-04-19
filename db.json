@@ -1,116 +1,14 @@
 {
-  "ajout-pointeur": [
-    {
-      "id": "1ee9",
-      "PrenomPointeur": "Fatim",
-      "NomPointeur": "Hanne",
-      "phone": "770574503"
-    },
-    {
-      "id": "d681",
-      "PrenomPointeur": "Fatimata",
-      "NomPointeur": "Gano",
-      "phone": "777059966"
-    },
-    {
-      "id": "8cac",
-      "PrenomPointeur": "Daba",
-      "NomPointeur": "Sarr",
-      "phone": "778897035"
-    }
-  ],
-  "pointages": [
-    {
-      "id": "6caf",
-      "nom": "Fatim Hanne",
-      "phone": "770574503",
-      "date": "2025-04-13",
-      "entree": "08:10:46",
-      "sortie": "15:12:15"
-    },
-    {
-      "id": "efeb",
-      "nom": "Fatim Hanne",
-      "phone": "770574503",
-      "date": "2025-04-27",
-      "entree": "09:05:25",
-      "sortie": "16:01:17"
-    },
-    {
-      "id": "fb52",
-      "nom": "Fatim Hanne",
-      "phone": "770574503",
-      "date": "2025-05-06",
-      "entree": "08:10:29",
-      "sortie": "16:13:57",
-       "role": ""
-    },
-    {
-      "id": "cabe",
-      "nom": "Fatim Hanne",
-      "phone": "770574503",
-      "date": "2025-05-15",
-      "entree": "08:19:30",
-      "sortie": "15:19:51"
-    },
-    {
-      "id": "d951",
-      "nom": "Fatimata Gano",
-      "phone": "777059966",
-      "date": "2025-04-13",
-      "entree": "10:19:34"
-    },
-    {
-      "id": "1e8f",
-      "nom": "Daba Sarr",
-      "phone": "778897035",
-      "date": "2025-04-14",
-      "entree": "08:37:19"
-    },
-    {
-      "id": "67fe",
-      "nom": "Fatim Hanne",
-      "phone": "770574503",
-      "date": "2025-04-14",
-      "entree": "11:44:31"
-    },
-    {
-      "id": "c89c",
-      "nom": "Fatim Hanne",
-      "phone": "770574503",
-      "date": "2025-04-16",
-      "entree": "10:07:34"
-    },
-    {
-      "id": "12a7",
-      "nom": "Fatimata Gano",
-      "phone": "777059966",
-      "date": "2025-04-16",
-      "entree": "10:27:22"
-    },
-    {
-      "id": "92e5",
-      "nom": "Daba Sarr",
-      "phone": "778897035",
-      "date": "2025-04-16",
-      "entree": "10:27:33"
-    }
-  ],
+  "ajout-pointeur": [],
+  "pointages": [],
   "admin": [
     {
-      "id": "9480",
-      "nomUtilisateur": "Rama GUEYU",
-      "mailUtilisateur": "deye@fggfug.com",
-      "motDePasse": "1234567",
-      "motDePasseConfirmation": "1234567"
-    },
-    {
-      "id": "2e12",
-      "nomUtilisateur": "Fatima hanne",
-      "phone": "",
-      "mailUtilisateur": "fatimagano21@gmail.com",
-      "motDePasse": "123456789",
-      "motDePasseConfirmation": "123456789"
+      "id": "41dc",
+      "nomUtilisateur": "Rama gv",
+      "mailUtilisateur": "rama02@gmail.com",
+      "numeroUtilisateur": "774044154",
+      "motDePasse": "12345678",
+      "motDePasseConfirmation": "12345678"
     }
   ]
 }

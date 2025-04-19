@@ -12,8 +12,7 @@ import Pointer from "./pages/pointer/Pointer"
 import { Toaster } from "react-hot-toast";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
-
-// import PrivateRoute from './components/PrivateRoute';
+import PrivateAdminRoute from './components/PrivateAdminRoute';
 import Connexion from './components/Connexion';
 import Inscription from "./components/Inscription";
 // Définition des routes avec `createBrowserRouter`
@@ -23,7 +22,12 @@ const router = createBrowserRouter([
     element: <Layout />,
     children: [
       { index: true, element: <Home /> }, // Page d'accueil par défaut
-      { path: "/admin", element: <Admin />},
+      {  path: '/admin',
+        element: (
+          <PrivateAdminRoute>
+            <Admin />
+          </PrivateAdminRoute>
+        )},
       { path: "/pointeur", element: <Pointeur /> },
       { path: "/listetudiant", element: <ListEtudiant /> },
        { path: "/add-pointage", element: <AddPointage /> },
