@@ -63,7 +63,7 @@ export default function Inscription() {
               </Typography>
     
               <div>
-                <img src="/src/assets/defarsci.jpg" alt="Logo" style={{ height: 50 }} />
+                <img src="/assets/defarsci.jpg" alt="Logo" style={{ height: 50 }} />
               </div>
             </Toolbar>
           </AppBar>
