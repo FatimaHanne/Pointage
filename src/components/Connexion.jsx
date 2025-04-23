@@ -19,7 +19,7 @@ export default function Connexion() {
 
   useEffect(() => {
     if (localStorage.getItem("admin")) {
-      navigate("/admin");
+      navigate("/");
     }
   }, []);
 
