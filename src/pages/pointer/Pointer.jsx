@@ -87,7 +87,7 @@ export default function Pointer() {
       fetchPointages();
       reset();
     } catch (error) {
-      console.error("Erreur lors du pointage :", error);
+      console.error("Erreur lors du pointage :", error.response || error.message || error);
       toast.error("Une erreur s'est produite.");
     }
   };  
