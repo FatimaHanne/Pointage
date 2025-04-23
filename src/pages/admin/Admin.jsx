@@ -175,8 +175,8 @@ const Admin = () => {
                 </Row>
                 </div>
               </div>
-    </div>
-  );
-};
+         </div>
+      );
+   };
 
 export default Admin

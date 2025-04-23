@@ -134,10 +134,10 @@ export default function Home() {
                   title: "Statistiques en temps réel",
                   desc: "Consultez les données de présence à tout moment.",
                 },
-                // {
-                //   title: "Gestion des rôles",
-                //   desc: "Admin et Pointeur avec accès personnalisés.",
-                // },
+                {
+                  title: "Gestion des rôles",
+                  desc: "Admin et Gestion avec accès personnalisés.",
+                },
               ].map((item, i) => (
                 <Card
                   key={i}

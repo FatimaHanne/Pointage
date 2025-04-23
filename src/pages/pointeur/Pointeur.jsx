@@ -5,10 +5,7 @@ import { Button, Typography, AppBar, Toolbar, IconButton } from "@mui/material";
 import { useNavigate,Link } from "react-router-dom";
 
 const Pointeur = () => {
-   const links = [
-//     { to: "/admin", label: "Admin", color: "#EA641B" },
-//     { to: "/pointeur", label: "Pointeur", color: "#85ACDC" },
-  ];
+   
 
   useEffect(() => {
     const styles = `
