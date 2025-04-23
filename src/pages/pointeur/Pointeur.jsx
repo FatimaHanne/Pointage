@@ -119,7 +119,7 @@ const Pointeur = () => {
 
               {/* Logo à droite */}
               <div>
-                <img src="/src/assets/defarsci.jpg" alt="Logo Defarsci" style={{ height: 50 }} />
+                <img src="/assets/defarsci.jpg" alt="Logo Defarsci" style={{ height: 50 }} />
               </div>
             </Toolbar>
           </AppBar>

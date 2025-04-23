@@ -105,7 +105,7 @@ const Admin = () => {
             <IconButton edge="start" onClick={handleRetour} sx={{ color: "#000" }}>
               <i className="bi bi-arrow-left" style={{ fontSize: "24px" }}></i>
             </IconButton>
-            <img src="/src/assets/defarsci.jpg" alt="Logo Defarsci" style={{ height: 40 }} />
+            <img src="/assets/defarsci.jpg" alt="Logo Defarsci" style={{ height: 40 }} />
           </Box>
 
               {/* Titre centré en bleu */}
