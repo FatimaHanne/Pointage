@@ -117,7 +117,7 @@ const Pointeur = () => {
                   color: "#0D6EFD", // Bleu Bootstrap
                 }}
               >
-                Espace Pointeur
+                Ressource Humains
               </Typography>
 
               {/* Logo à droite */}

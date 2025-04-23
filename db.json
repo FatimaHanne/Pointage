@@ -1,6 +1,90 @@
 {
-  "ajout-pointeur": [],
-  "pointages": [],
+  "ajout-pointeur": [
+    {
+      "id": "8e60",
+      "PrenomPointeur": "Fatimata",
+      "NomPointeur": "Gano",
+      "phone": "774044154",
+      "role": "admin"
+    },
+    {
+      "id": "979e",
+      "PrenomPointeur": "Booster",
+      "NomPointeur": "Design",
+      "phone": "777059966",
+      "role": "etudiant"
+    },
+    {
+      "id": "fd1a",
+      "PrenomPointeur": "Daba",
+      "NomPointeur": "Sarr",
+      "phone": "778897035",
+      "role": "etudiant"
+    },
+    {
+      "id": "395e",
+      "PrenomPointeur": "Kadia",
+      "NomPointeur": "Balde",
+      "phone": "756388092",
+      "role": "etudiant"
+    },
+    {
+      "id": "ac73",
+      "PrenomPointeur": "Awa",
+      "NomPointeur": "Gano",
+      "phone": "787878133",
+      "role": "admin"
+    },
+    {
+      "id": "eef8",
+      "PrenomPointeur": "Moussa",
+      "NomPointeur": "Ndoye",
+      "phone": "772781405",
+      "role": "etudiant"
+    }
+  ],
+  "pointages": [
+    {
+      "id": "f1f3",
+      "nom": "Fatimata Gano",
+      "phone": "774044154",
+      "date": "2025-04-23",
+      "entree": "08:59:12",
+      "role": "admin"
+    },
+    {
+      "id": "f0e3",
+      "nom": "Booster Design",
+      "phone": "777059966",
+      "date": "2025-04-23",
+      "entree": "08:59:23",
+      "role": "etudiant"
+    },
+    {
+      "id": "47db",
+      "nom": "Kadia Balde",
+      "phone": "756388092",
+      "date": "2025-04-23",
+      "entree": "08:59:31",
+      "role": "etudiant"
+    },
+    {
+      "id": "c5fa",
+      "nom": "Awa Gano",
+      "phone": "787878133",
+      "date": "2025-04-23",
+      "entree": "09:04:22",
+      "role": "admin"
+    },
+    {
+      "id": "a804",
+      "nom": "Moussa Ndoye",
+      "phone": "772781405",
+      "date": "2025-04-23",
+      "entree": "09:33:16",
+      "role": "etudiant"
+    }
+  ],
   "admin": [
     {
       "id": "41dc",
@@ -9,6 +93,14 @@
       "numeroUtilisateur": "774044154",
       "motDePasse": "12345678",
       "motDePasseConfirmation": "12345678"
+    },
+    {
+      "id": "9d7b",
+      "nomUtilisateur": "HawaGano",
+      "mailUtilisateur": "awa17@gmail.com",
+      "numeroUtilisateur": "787878133",
+      "motDePasse": "Gano2025",
+      "motDePasseConfirmation": "Gano2025"
     }
   ]
 }

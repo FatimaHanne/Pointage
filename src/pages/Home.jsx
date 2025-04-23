@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 export default function Home() {
   const links = [
     { to: "/admin", label: "Admin", color: "#EA641B" },
-    { to: "/pointeur", label: "Pointeur", color: "#85ACDC" },
+    { to: "/pointeur", label: "Gestion", color: "#85ACDC" },
   ];
 
   useEffect(() => {
@@ -134,10 +134,10 @@ export default function Home() {
                   title: "Statistiques en temps réel",
                   desc: "Consultez les données de présence à tout moment.",
                 },
-                {
-                  title: "Gestion des rôles",
-                  desc: "Admin et Pointeur avec accès personnalisés.",
-                },
+                // {
+                //   title: "Gestion des rôles",
+                //   desc: "Admin et Pointeur avec accès personnalisés.",
+                // },
               ].map((item, i) => (
                 <Card
                   key={i}
@@ -171,7 +171,7 @@ export default function Home() {
                 src="/src/assets/poiintage.png"
                 alt="Personne qui pointe"
                 className="img-fluid rounded fade-in"
-                style={{ maxWidth: "100%", maxHeight: 400 }}
+                style={{ width: "100%", maxHeight: 400 }}
               />
             </div>
           </div>

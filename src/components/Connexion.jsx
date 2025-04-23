@@ -38,7 +38,7 @@ export default function Connexion() {
         if (res.data.length > 0) {
           localStorage.setItem("admin", JSON.stringify(res.data[0]));
           toast.success("Connexion réussie");
-          navigate("/");
+          navigate("/admin");
         } else {
           toast.error("L'admin n'existe pas");
         }
