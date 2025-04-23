@@ -41,7 +41,7 @@ export default function AddPointage() {
         (admin) => admin.numeroUtilisateur === data.phone
       );
   
-      const role = adminMatch ? "admin" : "etudiant";
+      const role = adminMatch ? "admin" : "stagiaire";
       const pointeurAvecRole = { ...data, role };
   
       // 3. Vérifie si ce numéro existe déjà dans la base de pointage

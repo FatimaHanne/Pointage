@@ -75,16 +75,16 @@ export default function ListPointage() {
             Aucun pointage ce mois-ci.
           </Typography>
         ) : (
-          <TableContainer component={Paper} sx={{backgroundColor:""}}>
+          <TableContainer component={Paper} >
             <Table>
               <TableHead sx={{ backgroundColor: "#85ACDC" }}>
                 <TableRow>
-                  <TableCell><strong>Nom</strong></TableCell>
-                  <TableCell><strong>Téléphone</strong></TableCell>
-                  <TableCell><strong>Rôle</strong></TableCell>
-                  <TableCell><strong>Date</strong></TableCell>
-                  <TableCell><strong>Entrée</strong></TableCell>
-                  <TableCell><strong>Sortie</strong></TableCell>
+                  <TableCell sx={{color:"#ffff"}}><strong>Nom</strong></TableCell>
+                  <TableCell sx={{color:"#ffff"}}><strong>Téléphone</strong></TableCell>
+                  <TableCell sx={{color:"#ffff"}}><strong>Rôle</strong></TableCell>
+                  <TableCell sx={{color:"#ffff"}}><strong>Date</strong></TableCell>
+                  <TableCell sx={{color:"#ffff"}}><strong>Entrée</strong></TableCell>
+                  <TableCell sx={{color:"#ffff"}}><strong>Sortie</strong></TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -92,7 +92,7 @@ export default function ListPointage() {
                   <TableRow key={p.id}>
                     <TableCell>{p.nom}</TableCell>
                     <TableCell>{p.phone}</TableCell>
-                    <TableCell  >{p.role === "admin" ? "Admin" : "Étudiant"}</TableCell> 
+                    <TableCell  >{p.role === "admin" ? "Admin" : "Stagiaire"}</TableCell> 
                     <TableCell>{p.date}</TableCell>
                     <TableCell>{p.entree || "—"}</TableCell>
                     <TableCell>{p.sortie || "—"}</TableCell>

@@ -147,13 +147,13 @@ export default function ListEtudiant() {
               <TableContainer component={Paper}>
                 <Table>
                   <TableHead>
-                    <TableRow sx={{ backgroundColor: "#85ACDC" }}> 
-                      <TableCell><strong>ID</strong></TableCell>
-                      <TableCell><strong>Nom</strong></TableCell>
-                      <TableCell><strong>Prénom</strong></TableCell>
-                      <TableCell><strong>Numéro</strong></TableCell>
-                      <TableCell><strong>Rôle</strong></TableCell>
-                      <TableCell><strong>Actions</strong></TableCell>
+                    <TableRow sx={{ backgroundColor: "#85ACDC"}}> 
+                      <TableCell sx={{color:"#ffff"}}><strong>ID</strong></TableCell>
+                      <TableCell sx={{color:"#ffff"}}><strong>Nom</strong></TableCell>
+                      <TableCell sx={{color:"#ffff"}}><strong>Prénom</strong></TableCell>
+                      <TableCell sx={{color:"#ffff"}}><strong>Numéro</strong></TableCell>
+                      <TableCell sx={{color:"#ffff"}}><strong>Rôle</strong></TableCell>
+                      <TableCell sx={{color:"#ffff"}}><strong>Actions</strong></TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>

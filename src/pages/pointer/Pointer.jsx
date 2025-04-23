@@ -213,7 +213,7 @@ export default function Pointer() {
             pointages.map((p) => (
               <Box key={p.id} mb={2} p={2} sx={{ backgroundColor: "#fff", borderRadius: 1, border: "1px solid #e0e0e0" }}>
                 <Typography><strong>Nom :</strong> {p.nom}</Typography>
-                <Typography><strong>Rôle :</strong> {p.role === "admin" ? "admin" : "etudiant"}</Typography>
+                <Typography><strong>Rôle :</strong> {p.role === "admin" ? "admin" : "stagiaire"}</Typography>
                 <Typography><strong>Téléphone :</strong> {p.phone}</Typography>
                 <Typography color={p.entree ? "green" : "gray"}><strong>Entrée :</strong> {p.entree || "—"}</Typography>
                 <Typography color={p.sortie ? "blue" : "gray"}><strong>Sortie :</strong> {p.sortie || "—"}</Typography>
