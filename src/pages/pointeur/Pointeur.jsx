@@ -77,10 +77,10 @@ const Pointeur = () => {
             {/* Vecteurs en haut */}
             <div className="d-flex justify-content-between">
               <div className="w-50">
-                <img src="/src/assets/vector1.png" alt="Vector 1" className="img-fluid" />
+                <img src="/assets/vector1.png" alt="Vector 1" className="img-fluid" />
               </div>
               <div className="w-50 d-flex justify-content-end">
-                <img src="/src/assets/vector2.png" alt="Vector 2" className="img-fluid" />
+                <img src="/assets/vector2.png" alt="Vector 2" className="img-fluid" />
               </div>
             </div>
       
