@@ -65,10 +65,10 @@ export default function Home() {
       {/* Vecteurs en haut */}
       <div className="d-flex justify-content-between">
         <div className="w-50">
-          <img src="src/assets/vector1.png" alt="Vector 1" className="img-fluid" />
+          <img src="/assets/vector1.png" alt="Vector 1" className="img-fluid" />
         </div>
         <div className="w-50 d-flex justify-content-end">
-          <img src="src/assets/vector2.png" alt="Vector 2" className="img-fluid" />
+          <img src="/assets/vector2.png" alt="Vector 2" className="img-fluid" />
         </div>
       </div>
 
@@ -86,7 +86,7 @@ export default function Home() {
         }}
       >
         <Toolbar className="d-flex justify-content-between px-4">
-          <img src="/src/assets/defarsci.jpg" alt="Logo Defarsci" style={{ height: 50 }} />
+          <img src="/assets/defarsci.jpg" alt="Logo Defarsci" style={{ height: 50 }} />
           <div className="d-flex gap-2">
             {links.map((link) => (
               <Button onClick={() => navigate("/login")}
@@ -168,7 +168,7 @@ export default function Home() {
             {/* Image */}
             <div className="col-md-4">
               <img
-                src="/src/assets/poiintage.png"
+                src="/assets/poiintage.png"
                 alt="Personne qui pointe"
                 className="img-fluid rounded fade-in"
                 style={{ width: "100%", maxHeight: 400 }}
