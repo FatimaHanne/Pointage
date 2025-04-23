@@ -45,7 +45,7 @@ export default function Inscription() {
             }}
           >
             <Toolbar className="position-relative px-3 d-flex justify-content-between w-100">
-              <IconButton edge="start" onClick={() => navigate("/pointeur")} sx={{ color: "#000" }}>
+              <IconButton edge="start" onClick={() => navigate("/")} sx={{ color: "#000" }}>
                 <i className="bi bi-arrow-left" style={{ fontSize: "24px" }}></i>
               </IconButton>
     
