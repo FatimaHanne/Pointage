@@ -36,18 +36,18 @@ export default function Pointer() {
     const currentTime = now.getHours() * 60 + now.getMinutes();
     const morningStart = 8 * 60;
     const morningEnd = 12 * 60 + 0; // ou simplement 720
-    const eveningStart = 15 * 60;
-    const eveningEnd = 18 * 60;
+    const eveningStart = 15 * 60 ;
+    const eveningEnd = 18 * 60 + 0;
   
     try {
       const resPointeur = await axios.get(`http://localhost:3000/ajout-pointeur?phone=${phone}`);
-      const pointeur = resPointeur.data[0]; // Le pointeur trouv
+      const pointeur = resPointeur.data[0]; 
   
       if (!pointeur) {
         toast.error("L'utilisateur n'existe pas !");
-        return;
+        return; 
       }
-      const role = pointeur.role === "admin" || pointeur.role === "etudiant" ? pointeur.role : "etudiant"; // Valeur par défaut "etudiant"
+      const role = pointeur.role === "admin" || pointeur.role === "stagiaire" ? pointeur.role : "stagiaire"; // Valeur par défaut "etudiant"
   
       const nomComplet = `${pointeur.PrenomPointeur} ${pointeur.NomPointeur}`;
   
