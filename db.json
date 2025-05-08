@@ -39,6 +39,22 @@
       "date": "2025-04-24",
       "entree": "09:08:23",
       "role": "stagiaire"
+    },
+    {
+      "id": "9633",
+      "nom": "Daba Gano",
+      "phone": "778897035",
+      "date": "2025-05-08",
+      "entree": "09:08:32",
+      "role": "stagiaire"
+    },
+    {
+      "id": "a3d1",
+      "nom": "Fatimata Gano",
+      "phone": "774044154",
+      "date": "2025-05-08",
+      "entree": "09:11:45",
+      "role": "admin"
     }
   ],
   "admin": [
@@ -57,6 +73,14 @@
       "numeroUtilisateur": "787878133",
       "motDePasse": "Gano2025",
       "motDePasseConfirmation": "Gano2025"
+    },
+    {
+      "id": "d3f1",
+      "nomUtilisateur": "Kadiatou GANO",
+      "mailUtilisateur": "balde@23gmail.com",
+      "numeroUtilisateur": "778897935",
+      "motDePasse": "12345678",
+      "motDePasseConfirmation": "12345678"
     }
   ]
 }
