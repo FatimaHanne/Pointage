@@ -185,7 +185,7 @@ export default function ListPointage() {
                   <TableRow>
                     <TableCell sx={{ color: "#fff" }}><strong>Nom</strong></TableCell>
                     <TableCell sx={{ color: "#fff" }}><strong>Téléphone</strong></TableCell>
-                    <TableCell sx={{ color: "#fff" }}><strong>Rôle</strong></TableCell>
+                    <TableCell sx={{ color: "#fff" }}><strong>Statut</strong></TableCell>
                     <TableCell sx={{ color: "#fff" }}><strong>Date</strong></TableCell>
                     <TableCell sx={{ color: "#fff" }}><strong>Entrée</strong></TableCell>
                     <TableCell sx={{ color: "#fff" }}><strong>Sortie</strong></TableCell>
