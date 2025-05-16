@@ -107,8 +107,8 @@ export default function AddPointage() {
           <Typography variant="h6" sx={{ position: "absolute", left: "50%", transform: "translateX(-50%)", fontWeight: "bold", color: "#0D6EFD" }}>
             Ajouter un pointeur
           </Typography>
-          <div>
-            <img src="/src/assets/defarsci.jpg" alt="Logo" style={{ height: 50 }} />
+           <div>
+            <img src="/assets/defarsci.jpg" alt="Logo" style={{ height: 50 }} />
           </div>
         </Toolbar>
       </AppBar>

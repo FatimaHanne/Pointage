@@ -1,42 +1,35 @@
+// src/context/AuthContext.jsx
 import { createContext, useContext, useEffect, useState } from "react";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { auth } from "../firebase"; // ⚠️ adapte le chemin si nécessaire
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(undefined); // undefined = en cours de chargement
 
   useEffect(() => {
-    // Récupérer les infos du localStorage
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    const expiration = localStorage.getItem("expiration");
-
-    if (storedUser && expiration) {
-      const now = new Date().getTime();
-      if (now < parseInt(expiration)) {
-        setUser(storedUser);
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        setUser(firebaseUser);
+        localStorage.setItem("user", JSON.stringify(firebaseUser)); // optionnel
       } else {
-        logout(); // session expirée
+        setUser(null);
+        localStorage.removeItem("user");
       }
-    }
+    });
+
+    return () => unsubscribe(); // nettoyage
   }, []);
 
-  const login = (userData) => {
-    const now = new Date().getTime();
-    const expireIn24h = now + 24 * 60 * 60 * 1000; // 24 heures en ms
-
-    localStorage.setItem("user", JSON.stringify(userData));
-    localStorage.setItem("expiration", expireIn24h.toString());
-    setUser(userData);
-  };
-
-  const logout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("expiration");
+  const logout = async () => {
+    await signOut(auth);
     setUser(null);
+    localStorage.removeItem("user");
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, logout }}>
       {children}
     </AuthContext.Provider>
   );

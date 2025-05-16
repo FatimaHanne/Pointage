@@ -1,5 +1,15 @@
 {
   "projects": {
     "default": "pointage-284ae"
-  }
+  },
+  "targets": {
+    "pointage-284ae": {
+      "hosting": {
+        "default": [
+          "pointage-284ae"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

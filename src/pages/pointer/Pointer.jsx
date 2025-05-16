@@ -44,6 +44,7 @@ export default function Pointer() {
       const data = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
+        statut: doc.data().statut,  
       }));
       const sorted = data.sort((a, b) => (a.entree > b.entree ? -1 : 1));
       setPointages(sorted);
@@ -57,76 +58,83 @@ export default function Pointer() {
     fetchPointages();
   }, []);
 
-  const onSubmit = async ({ phone }) => {
-    const now = new Date();
-    const heureNow = now.toLocaleTimeString("fr-FR", { hour12: false });
-    const currentTime = now.getHours() * 60 + now.getMinutes();
-    const morningStart = 8 * 60;
-    const morningEnd = 12 * 60;
-    const eveningStart = 15 * 60;
-    const eveningEnd = 18 * 60;
+const onSubmit = async ({ phone }) => {
+  const now = new Date();
+  const heures = now.getHours();
+  const minutes = now.getMinutes();
+  const currentTime = heures * 60 + minutes; // Total de minutes depuis minuit
+    console.log("Current Time (en minutes depuis minuit) :", currentTime); // Ajouter ce log
 
-    try {
-      const qPointeur = query(collection(db, "ajout-pointeur"), where("phone", "==", phone));
-      const resPointeur = await getDocs(qPointeur);
-      const pointeurDoc = resPointeur.docs[0];
+  const matinDebut = 8 * 60;     // 8h00
+  const matinFin = 12 * 60;      // 12h00 inclus
+  const soirDebut = 15 * 60;     // 15h00
+  const soirFin = 18 * 60;       // 18h00 inclus
 
-      if (!pointeurDoc) {
-        toast.error("L'utilisateur n'existe pas !");
-        return;
+  const isInMorningWindow = currentTime >= matinDebut && currentTime <= matinFin;
+  const isInEveningWindow = currentTime >= soirDebut && currentTime <= soirFin;
+
+  try {
+    const qPointeur = query(collection(db, "ajout-pointeur"), where("phone", "==", phone));
+    const resPointeur = await getDocs(qPointeur);
+    const pointeurDoc = resPointeur.docs[0];
+
+    if (!pointeurDoc) {
+      toast.error("L'utilisateur n'existe pas !");
+      return;
+    }
+
+    const pointeur = pointeurDoc.data();
+    const role = pointeur.role === "admin" ? "admin" : "stagiaire";
+    const nomComplet = `${pointeur.PrenomPointeur} ${pointeur.NomPointeur}`;
+
+    const today = new Date().toISOString().split("T")[0];
+    const qPointage = query(
+      collection(db, "pointages"),
+      where("phone", "==", phone),
+      where("date", "==", today)
+    );
+    const resPointage = await getDocs(qPointage);
+    const pointageDoc = resPointage.docs[0];
+
+    if (!pointageDoc) {
+      // Si aucune entrée encore aujourd'hui
+      if (isInMorningWindow) {
+        await addDoc(collection(db, "pointages"), {
+          nom: nomComplet,
+          phone: pointeur.phone,
+          date: today,
+          entree: now.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }),
+          statut: role,
+        });
+        toast.success("Entrée enregistrée !");
+      } else {
+        toast.error("L’entrée est autorisée uniquement de 8h00 à 12h00.");
       }
-
-      const pointeur = pointeurDoc.data();
-      const role = pointeur.role === "admin" || pointeur.role === "stagiaire" ? pointeur.role : "stagiaire";
-      const nomComplet = `${pointeur.PrenomPointeur} ${pointeur.NomPointeur}`;
-
-      const qPointage = query(
-        collection(db, "pointages"),
-        where("phone", "==", phone),
-        where("date", "==", today)
-      );
-      const resPointage = await getDocs(qPointage);
-      const pointageDoc = resPointage.docs[0];
-
-      const isInMorningWindow = currentTime >= morningStart && currentTime <= morningEnd;
-      const isInEveningWindow = currentTime >= eveningStart && currentTime <= eveningEnd;
-
-      if (!pointageDoc) {
-        if (isInMorningWindow) {
-          await addDoc(collection(db, "pointages"), {
-            nom: nomComplet,
-            phone: pointeur.phone,
-            date: today,
-            entree: heureNow,
-            role: role,
+    } else {
+      // Si une entrée existe déjà, on vérifie si la sortie est déjà enregistrée
+      const pointage = pointageDoc.data();
+      if (!pointage.sortie) {
+        if (isInEveningWindow) {
+          await updateDoc(doc(db, "pointages", pointageDoc.id), {
+            sortie: now.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }),
           });
-          toast.success("Entrée enregistrée");
+          toast.success("Sortie enregistrée !");
         } else {
-          toast.error("L’entrée est autorisée uniquement de 8h à 12h");
+          toast.error("La sortie est autorisée uniquement de 15h00 à 18h00.");
         }
       } else {
-        const pointage = pointageDoc.data();
-        if (!pointage.sortie) {
-          if (isInEveningWindow) {
-            await updateDoc(doc(db, "pointages", pointageDoc.id), {
-              sortie: heureNow,
-            });
-            toast.success("Sortie enregistrée");
-          } else {
-            toast.error("La sortie est autorisée uniquement de 15h à 18h");
-          }
-        } else {
-          toast.error("Vous avez déjà pointé l'entrée et la sortie aujourd'hui.");
-        }
+        toast.error("Vous avez déjà pointé l'entrée et la sortie aujourd'hui.");
       }
-
-      fetchPointages();
-      reset();
-    } catch (error) {
-      console.error("Erreur lors du pointage :", error);
-      toast.error("Une erreur s'est produite.");
     }
-  };
+
+    fetchPointages();
+    reset();
+  } catch (error) {
+    console.error("Erreur lors du pointage :", error);
+    toast.error("Une erreur s'est produite.");
+  }
+};
+
 
   return (
     <>
@@ -240,29 +248,33 @@ export default function Pointer() {
             }}
           >
             <Typography variant="h6" fontWeight="bold" marginBottom={2}>
-              Liste des pointages du jour
+            Liste des présents
+          </Typography>
+          <Divider />
+          {pointages.length === 0 ? (
+            <Typography color="gray" mt={2}>
+              Aucun pointage pour aujourd’hui.
             </Typography>
-            <Divider />
-            {pointages.length === 0 ? (
-              <Typography color="gray" mt={2}>
-                Aucun pointage pour aujourd’hui.
-              </Typography>
-            ) : (
-              pointages.map((p) => (
-                <Box
-                  key={p.id}
-                  mb={2}
-                  p={2}
-                  sx={{ backgroundColor: "#fff", borderRadius: 1, border: "1px solid #e0e0e0" }}
-                >
-                  <Typography><strong>Nom :</strong> {p.nom}</Typography>
-                  <Typography><strong>Rôle :</strong> {p.role === "admin" ? "admin" : "stagiaire"}</Typography>
-                  <Typography><strong>Téléphone :</strong> {p.phone}</Typography>
-                  <Typography color={p.entree ? "green" : "gray"}><strong>Entrée :</strong> {p.entree || "—"}</Typography>
-                  <Typography color={p.sortie ? "blue" : "gray"}><strong>Sortie :</strong> {p.sortie || "—"}</Typography>
-                </Box>
-              ))
-            )}
+          ) : (
+            pointages.map((p) => (
+              <Box
+                key={p.id}
+                mb={2}
+                p={2}
+                sx={{ backgroundColor: "#fff", borderRadius: 1, border: "1px solid #e0e0e0" }}
+              >
+              <Typography><strong>Statut :</strong> {p.statut}</Typography>
+    
+                <Typography><strong>Téléphone :</strong> {p.phone}</Typography>
+                <Typography color={p.entree ? "green" : "gray"}>
+                  <strong>Entrée :</strong> {p.entree || "—"}
+                </Typography>
+                <Typography color={p.sortie ? "blue" : "gray"}>
+                  <strong>Sortie :</strong> {p.sortie || "—"}
+                </Typography>
+              </Box>
+            ))
+          )}
           </Box>
         </Stack>
       </Stack>
