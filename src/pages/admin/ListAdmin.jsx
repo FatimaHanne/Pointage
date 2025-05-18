@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { deleteDoc, doc , collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../../firebase";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 import {
   AppBar,
   Toolbar,
@@ -23,6 +26,29 @@ const ListAdmin = () => {
   const [admins, setAdmins] = useState([]);
   const [authorized, setAuthorized] = useState(null);
   const navigate = useNavigate();
+  const handleDeleteAdmin = async (uid) => {
+    try {
+      // 1. Trouver le document Firestore qui a ce uid
+      const snapshot = await getDocs(query(collection(db, "users"), where("uid", "==", uid)));
+      if (snapshot.empty) {
+        alert("Admin non trouvé dans Firestore.");
+        return;
+      }
+
+      const docId = snapshot.docs[0].id;
+
+      // 2. Supprimer le document Firestore
+      await deleteDoc(doc(db, "users", docId));
+
+      // 3. Supprimer dans l'état local
+      setAdmins((prevAdmins) => prevAdmins.filter((admin) => admin.uid !== uid));
+
+       toast.success("Admin supprimé avec succès !");
+    } catch (error) {
+      console.error("Erreur lors de la suppression :", error);
+       toast.error("Erreur lors de la suppression de l'admin.");
+    }
+  };
 
   useEffect(() => {
     // 1. Vérifier le rôle dans localStorage
@@ -146,22 +172,35 @@ const ListAdmin = () => {
         <Paper elevation={3} sx={{ p: 3, borderRadius: 3 }}>
           <TableContainer>
             <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: "bold", color: "#0D6EFD" }}>Nom</TableCell>
-                  <TableCell sx={{ fontWeight: "bold", color: "#0D6EFD" }}>Email</TableCell>
-                  <TableCell sx={{ fontWeight: "bold", color: "#0D6EFD" }}>UID</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {admins.map((admin) => (
-                  <TableRow key={admin.id}>
-                    <TableCell>{admin.nom}</TableCell>
-                    <TableCell>{admin.email}</TableCell>
-                    <TableCell>{admin.uid}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
+            <TableHead>
+            <TableRow>
+              <TableCell sx={{ fontWeight: "bold", color: "#0D6EFD" }}>Nom</TableCell>
+              <TableCell sx={{ fontWeight: "bold", color: "#0D6EFD" }}>Email</TableCell>
+              <TableCell sx={{ fontWeight: "bold", color: "#0D6EFD" }}>UID</TableCell>
+              <TableCell sx={{ fontWeight: "bold", color: "#0D6EFD" }}>Numéro</TableCell> {/* Nouvelle colonne */}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {admins.map((admin) => (
+              <TableRow key={admin.id}>
+                <TableCell>{admin.nom}</TableCell>
+                <TableCell>{admin.email}</TableCell>
+                <TableCell>{admin.uid}</TableCell>
+                <TableCell>{admin.phone}</TableCell> {/* Affiche le numéro */}
+                <TableCell>
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      onClick={() => handleDeleteAdmin(admin.uid)}
+                    >
+                      Supprimer
+                    </Button>
+              </TableCell>
+
+              </TableRow>
+            ))}
+          </TableBody>
+
             </Table>
           </TableContainer>
         </Paper>

@@ -22,8 +22,7 @@ import {
   updateDoc,
   doc,
 } from "firebase/firestore";
-import { db, auth } from "../../firebase";
-// 🔥 Assure-toi que db est bien importé
+import { db } from "../../firebase";
 
 export default function Pointer() {
   const navigate = useNavigate();
@@ -44,7 +43,6 @@ export default function Pointer() {
       const data = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
-        statut: doc.data().statut,  
       }));
       const sorted = data.sort((a, b) => (a.entree > b.entree ? -1 : 1));
       setPointages(sorted);
@@ -62,32 +60,30 @@ const onSubmit = async ({ phone }) => {
   const now = new Date();
   const heures = now.getHours();
   const minutes = now.getMinutes();
-  const currentTime = heures * 60 + minutes; // Total de minutes depuis minuit
-    console.log("Current Time (en minutes depuis minuit) :", currentTime); // Ajouter ce log
-
-  const matinDebut = 8 * 60;     // 8h00
-  const matinFin = 12 * 60;      // 12h00 inclus
-  const soirDebut = 15 * 60;     // 15h00
-  const soirFin = 18 * 60;       // 18h00 inclus
-
-  const isInMorningWindow = currentTime >= matinDebut && currentTime <= matinFin;
-  const isInEveningWindow = currentTime >= soirDebut && currentTime <= soirFin;
+  const currentTime = heures * 60 + minutes;
+  const midi = 12 * 60;
+  const debutSortie = 15 * 60;
+  const finSortie = 18 * 60;
+  const today = new Date().toISOString().split("T")[0];
 
   try {
-    const qPointeur = query(collection(db, "ajout-pointeur"), where("phone", "==", phone));
+    // 🔍 Chercher l’utilisateur dans 'ajout-pointeur'
+    const qPointeur = query(
+      collection(db, "ajout-pointeur"),
+      where("numeroUtilisateur", "==", phone)
+    );
     const resPointeur = await getDocs(qPointeur);
-    const pointeurDoc = resPointeur.docs[0];
 
-    if (!pointeurDoc) {
-      toast.error("L'utilisateur n'existe pas !");
+    if (resPointeur.empty) {
+      toast.error("Numéro non autorisé.");
       return;
     }
 
-    const pointeur = pointeurDoc.data();
-    const role = pointeur.role === "admin" ? "admin" : "stagiaire";
-    const nomComplet = `${pointeur.PrenomPointeur} ${pointeur.NomPointeur}`;
+    const pointeurData = resPointeur.docs[0].data();
+    const nomComplet = `${pointeurData.PrenomPointeur} ${pointeurData.NomPointeur}`;
+    const statut = pointeurData.role || "stagiaire";
 
-    const today = new Date().toISOString().split("T")[0];
+    // 🔁 Vérifier s’il a déjà pointé aujourd’hui
     const qPointage = query(
       collection(db, "pointages"),
       where("phone", "==", phone),
@@ -97,33 +93,39 @@ const onSubmit = async ({ phone }) => {
     const pointageDoc = resPointage.docs[0];
 
     if (!pointageDoc) {
-      // Si aucune entrée encore aujourd'hui
-      if (isInMorningWindow) {
+      // 📌 Entrée
+      if (currentTime <= midi) {
         await addDoc(collection(db, "pointages"), {
           nom: nomComplet,
-          phone: pointeur.phone,
+          phone: phone,
           date: today,
-          entree: now.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }),
-          statut: role,
+          entree: now.toLocaleTimeString("fr-FR", {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          statut: statut,
         });
         toast.success("Entrée enregistrée !");
       } else {
-        toast.error("L’entrée est autorisée uniquement de 8h00 à 12h00.");
+        toast.error("L’entrée est autorisée uniquement avant 12h00.");
       }
     } else {
-      // Si une entrée existe déjà, on vérifie si la sortie est déjà enregistrée
+      // 📌 Sortie
       const pointage = pointageDoc.data();
       if (!pointage.sortie) {
-        if (isInEveningWindow) {
+        if (currentTime >= debutSortie && currentTime <= finSortie) {
           await updateDoc(doc(db, "pointages", pointageDoc.id), {
-            sortie: now.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }),
+            sortie: now.toLocaleTimeString("fr-FR", {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
           });
           toast.success("Sortie enregistrée !");
         } else {
-          toast.error("La sortie est autorisée uniquement de 15h00 à 18h00.");
+          toast.error("La sortie est autorisée entre 15h00 et 18h00.");
         }
       } else {
-        toast.error("Vous avez déjà pointé l'entrée et la sortie aujourd'hui.");
+        toast.error("Vous avez déjà pointé l'entrée et la sortie.");
       }
     }
 
@@ -134,7 +136,6 @@ const onSubmit = async ({ phone }) => {
     toast.error("Une erreur s'est produite.");
   }
 };
-
 
   return (
     <>
@@ -151,7 +152,11 @@ const onSubmit = async ({ phone }) => {
         }}
       >
         <Toolbar className="position-relative px-3 d-flex justify-content-between w-100">
-          <IconButton edge="start" onClick={() => navigate("/pointeur")} sx={{ color: "#000" }}>
+          <IconButton
+            edge="start"
+            onClick={() => navigate("/pointeur")}
+            sx={{ color: "#000" }}
+          >
             <i className="bi bi-arrow-left" style={{ fontSize: "24px" }}></i>
           </IconButton>
           <Typography
@@ -172,7 +177,13 @@ const onSubmit = async ({ phone }) => {
         </Toolbar>
       </AppBar>
 
-      <Stack alignItems="center" justifyContent="center" width="100%" minHeight="100vh" sx={{ background: "linear-gradient(135deg, #E3F2FD, #ffffff)", padding: 4 }}>
+      <Stack
+        alignItems="center"
+        justifyContent="center"
+        width="100%"
+        minHeight="100vh"
+        sx={{ background: "linear-gradient(135deg, #E3F2FD, #ffffff)", padding: 4 }}
+      >
         <Stack
           direction={{ xs: "column", md: "row" }}
           spacing={4}
@@ -223,7 +234,11 @@ const onSubmit = async ({ phone }) => {
                   helperText={errors.phone?.message}
                 />
                 <Stack direction="row" justifyContent="center">
-                  <Button variant="contained" type="submit" sx={{ marginTop: 1, paddingX: 3, paddingY: 1 }}>
+                  <Button
+                    variant="contained"
+                    type="submit"
+                    sx={{ marginTop: 1, paddingX: 3, paddingY: 1 }}
+                  >
                     Pointer
                   </Button>
                 </Stack>
@@ -248,33 +263,52 @@ const onSubmit = async ({ phone }) => {
             }}
           >
             <Typography variant="h6" fontWeight="bold" marginBottom={2}>
-            Liste des présents
-          </Typography>
-          <Divider />
-          {pointages.length === 0 ? (
-            <Typography color="gray" mt={2}>
-              Aucun pointage pour aujourd’hui.
+              Liste des présents
             </Typography>
-          ) : (
-            pointages.map((p) => (
-              <Box
-                key={p.id}
-                mb={2}
-                p={2}
-                sx={{ backgroundColor: "#fff", borderRadius: 1, border: "1px solid #e0e0e0" }}
-              >
-              <Typography><strong>Statut :</strong> {p.statut}</Typography>
-    
-                <Typography><strong>Téléphone :</strong> {p.phone}</Typography>
-                <Typography color={p.entree ? "green" : "gray"}>
-                  <strong>Entrée :</strong> {p.entree || "—"}
-                </Typography>
-                <Typography color={p.sortie ? "blue" : "gray"}>
-                  <strong>Sortie :</strong> {p.sortie || "—"}
-                </Typography>
-              </Box>
-            ))
-          )}
+            <Divider />
+            {pointages.length === 0 ? (
+              <Typography color="gray" mt={2}>
+                Aucun pointage pour aujourd’hui.
+              </Typography>
+            ) : (
+              pointages.map((p) => (
+                <Box
+                  key={p.id}
+                  mb={2}
+                  p={2}
+                  sx={{
+                    backgroundColor: "#fff",
+                    borderRadius: 1,
+                    border: "1px solid #e0e0e0",
+                  }}
+                >
+                  <Typography>
+                    <strong>Nom :</strong> {p.nom}
+                  </Typography>
+                  <Typography
+                    sx={{
+                      color:
+                        p.statut === "admin"
+                          ? "#d32f2f"
+                          : p.statut === "stagiaire"
+                          ? "#1976d2"
+                          : "gray",
+                    }}
+                  >
+                    <strong>Statut :</strong> {p.statut}
+                  </Typography>
+                  <Typography>
+                    <strong>Téléphone :</strong> {p.phone}
+                  </Typography>
+                  <Typography color={p.entree ? "green" : "gray"}>
+                    <strong>Entrée :</strong> {p.entree || "—"}
+                  </Typography>
+                  <Typography color={p.sortie ? "blue" : "gray"}>
+                    <strong>Sortie :</strong> {p.sortie || "—"}
+                  </Typography>
+                </Box>
+              ))
+            )}
           </Box>
         </Stack>
       </Stack>

@@ -71,7 +71,7 @@ export default function ListEtudiant() {
     setEditData({
       NomPointeur: employé.NomPointeur,
       PrenomPointeur: employé.PrenomPointeur,
-      phone: employé.phone,
+      numeroUtilisateur: employé.numeroUtilisateur,
       role: employé.role,
     });
   };
@@ -96,6 +96,7 @@ export default function ListEtudiant() {
       await updateDoc(doc(db, "ajout-pointeur", id), updatedData);
       setEmployés((prev) =>
         prev.map((emp) => (emp.id === id ? { ...emp, ...updatedData } : emp))
+
       );
       toast.success("Pointeur mis à jour !");
       setEditingId(null);
@@ -211,7 +212,7 @@ export default function ListEtudiant() {
                           size="small"
                         />
                       ) : (
-                        employé.phone
+                        employé.numeroUtilisateur
                       )}
                     </TableCell>
                     <TableCell>

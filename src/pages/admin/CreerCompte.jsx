@@ -23,16 +23,15 @@ const CreerCompte = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // Nouvel état pour savoir si on est autorisé
   const [authorized, setAuthorized] = useState(null);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [nom, setNom] = useState("");
+  const [phone, setPhone] = useState("");  // <-- nouvel état pour numéro
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    // Vérifie si on est bien l'admin principal
     if (!user) {
       setAuthorized(false);
     } else if (user.uid === ADMIN_PRINCIPAL_UID) {
@@ -42,12 +41,8 @@ const CreerCompte = () => {
     }
   }, [user]);
 
-  // Tant que l'autorisation n'est pas déterminée, on peut ne rien afficher
-  if (authorized === null) {
-    return null;
-  }
+  if (authorized === null) return null;
 
-  // Si non autorisé, on affiche un message et un bouton de retour
   if (!authorized) {
     return (
       <Box
@@ -60,25 +55,19 @@ const CreerCompte = () => {
           p: 3,
         }}
       >
-      <IconButton
-        onClick={() => navigate("/admin")}
-        sx={{ position: "absolute", top: 16, left: 16, color: "#000" }}
-        edge="start"
-      >
-        <i className="bi bi-arrow-left" style={{ fontSize: "24px" }}></i>
-      </IconButton>
+        <IconButton
+          onClick={() => navigate("/admin")}
+          sx={{ position: "absolute", top: 16, left: 16, color: "#000" }}
+          edge="start"
+        >
+          <i className="bi bi-arrow-left" style={{ fontSize: "24px" }}></i>
+        </IconButton>
         <Paper elevation={3} sx={{ p: 4, textAlign: "center" }}>
           <Typography variant="h5" gutterBottom>
             Accès non autorisé
           </Typography>
-          <Typography variant="body1">
-            Vous n'êtes pas l'administrateur principal.
-          </Typography>
-          <Button
-            variant="contained"
-            sx={{ mt: 3 }}
-            onClick={() => navigate("/admin")}
-          >
+          <Typography variant="body1">Vous n'êtes pas l'administrateur principal.</Typography>
+          <Button variant="contained" sx={{ mt: 3 }} onClick={() => navigate("/admin")}>
             Retour à la page admin
           </Button>
         </Paper>
@@ -86,9 +75,12 @@ const CreerCompte = () => {
     );
   }
 
-  // Sinon, on affiche le formulaire de création d'admin
   const handleCreateAdmin = async (e) => {
     e.preventDefault();
+
+    // Normalisation simple du numéro (optionnel)
+    const normalizedPhone = phone.replace(/\D/g, "").replace(/^221/, "");
+
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const newUser = userCredential.user;
@@ -97,6 +89,7 @@ const CreerCompte = () => {
         uid: newUser.uid,
         email,
         nom,
+        phone: normalizedPhone,  // <-- on stocke le numéro ici
         role: "admin",
         createdAt: new Date(),
       });
@@ -105,6 +98,7 @@ const CreerCompte = () => {
       setEmail("");
       setPassword("");
       setNom("");
+      setPhone(""); // Réinitialiser le numéro
     } catch (error) {
       setMessage("❌ Erreur : " + error.message);
     }
@@ -166,6 +160,16 @@ const CreerCompte = () => {
               onChange={(e) => setEmail(e.target.value)}
               margin="normal"
               required
+            />
+            <TextField
+              label="Téléphone"
+              type="tel"
+              fullWidth
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              margin="normal"
+              required
+              inputProps={{ maxLength: 15 }}
             />
             <TextField
               label="Mot de passe"

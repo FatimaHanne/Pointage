@@ -79,7 +79,11 @@ const Admin = () => {
   styleSheet.type = "text/css";
   styleSheet.innerText = styles;
   document.head.appendChild(styleSheet);
-
+  const admin = localStorage.getItem("admin");
+  if (!admin) {
+    navigate("/connexion", { replace: true });
+    return; // on stoppe le reste du code si non authentifié
+  }
     fetchEmployés();
     fetchAdmins();
   }, []);

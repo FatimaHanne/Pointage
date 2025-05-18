@@ -20,7 +20,6 @@ export default function AddPointage() {
     formState: { errors },
   } = useForm();
 
-  // Effectuer une vérification à chaque chargement de la page
   useEffect(() => {
     if (!localStorage.getItem("admin")) {
       navigate("/connexion");
@@ -28,64 +27,47 @@ export default function AddPointage() {
     fetchEmployés();
   }, []);
 
-  // Fonction pour récupérer les employés depuis Firestore
   const fetchEmployés = async () => {
     const snapshot = await getDocs(collection(db, "ajout-pointeur"));
     const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     setEmployés(data);
   };
 
-  const onSubmit = async (data) => {
+const onSubmit = async (data) => {
   try {
-    // Fonction pour normaliser les numéros de téléphone (éliminer les caractères non-numériques et le préfixe 221)
     const normalizeNumber = (num) => {
       if (!num) return "";
       return num.replace(/\D/g, "").replace(/^221/, "");
     };
 
-    // Normalisation du numéro de téléphone saisi dans le formulaire
     const normalizedPhone = normalizeNumber(data.phone);
 
-    // Récupération de tous les documents de la collection "admins"
     const adminSnapshot = await getDocs(collection(db, "admins"));
 
-    // Vérification si le numéro existe dans la collection "admins"
     let isAdmin = false;
     adminSnapshot.forEach((doc) => {
-      // Récupérer le numéro de l'administrateur et le normaliser
       const adminPhone = normalizeNumber(doc.data().numeroUtilisateur || "");
-      
-      // Afficher à des fins de débogage
-      console.log("Numéro normalisé du pointeur:", normalizedPhone);
-      console.log("Numéro normalisé de l'admin:", adminPhone);
-      
-      // Vérifier si les numéros correspondent
       if (normalizedPhone === adminPhone) {
         isAdmin = true;
       }
     });
 
-    // Déterminer le rôle en fonction de la correspondance
     const role = isAdmin ? "admin" : "stagiaire";
-    console.log("Rôle attribué:", role);
 
-    // Vérifier si ce numéro existe déjà dans la collection "ajout-pointeur"
-    const q = query(collection(db, "ajout-pointeur"), where("phone", "==", normalizedPhone));
+    const q = query(collection(db, "ajout-pointeur"), where("numeroUtilisateur", "==", normalizedPhone));
     const doublonSnapshot = await getDocs(q);
     if (!doublonSnapshot.empty) {
       toast.error("Ce numéro est déjà enregistré");
       return;
     }
 
-    // Préparer les données à envoyer avec le téléphone normalisé et le rôle
     const pointeurAvecRole = {
       NomPointeur: data.NomPointeur,
       PrenomPointeur: data.PrenomPointeur,
-      phone: normalizedPhone,
+      numeroUtilisateur: normalizedPhone,
       role: role,
     };
-    console.log("objet a envoyer:", pointeurAvecRole)
-    // Enregistrer dans Firestore
+
     await addDoc(collection(db, "ajout-pointeur"), pointeurAvecRole);
     toast.success(`Ajouté avec succès comme ${role}`);
     reset();
@@ -97,6 +79,7 @@ export default function AddPointage() {
     toast.error("Une erreur est survenue");
   }
 };
+
   return (
     <Box sx={{ background: "linear-gradient(135deg, #E3F2FD, #ffffff)", minHeight: "100vh" }}>
       <AppBar position="absolute" elevation={4} sx={{ backgroundColor: "transparent", boxShadow: "0 4px 10px rgba(0,0,0,0.2)", zIndex: 10 }}>
@@ -107,7 +90,7 @@ export default function AddPointage() {
           <Typography variant="h6" sx={{ position: "absolute", left: "50%", transform: "translateX(-50%)", fontWeight: "bold", color: "#0D6EFD" }}>
             Ajouter un pointeur
           </Typography>
-           <div>
+          <div>
             <img src="/assets/defarsci.jpg" alt="Logo" style={{ height: 50 }} />
           </div>
         </Toolbar>

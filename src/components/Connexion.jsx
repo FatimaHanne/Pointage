@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Stack,
@@ -11,20 +11,31 @@ import {
 } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
-import { db, auth } from "../firebase";
-
+import { db } from "../firebase";
 
 export default function Connexion() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [loadingRedirect, setLoadingRedirect] = useState(true);
 
+  // Redirection automatique si utilisateur admin est déjà connecté
   useEffect(() => {
-    if (localStorage.getItem("admin")) {
-      navigate("/admin");
+    const adminData = localStorage.getItem("admin");
+    if (adminData) {
+      const parsedData = JSON.parse(adminData);
+      // On vérifie que c'est bien un admin (role admin ou user admin)
+      if (parsedData.role === "admin" || parsedData.role === "user") {
+        // Rediriger vers la page admin si on est sur la page connexion
+        if (location.pathname === "/connexion") {
+          navigate("/admin", { replace: true });
+        }
+      }
     }
-  }, []);
+    setLoadingRedirect(false);
+  }, [location.pathname, navigate]);
 
   const {
     register,
@@ -32,53 +43,65 @@ export default function Connexion() {
     formState: { errors },
   } = useForm();
 
-const onSubmit = async (data) => {
-  const auth = getAuth();
-  try {
-    const userCredential = await signInWithEmailAndPassword(
-      auth,
-      data.mailUtilisateur,
-      data.motDePasse
-    );
-    const user = userCredential.user;
+  const onSubmit = async (data) => {
+    try {
+      const auth = getAuth();
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        data.mailUtilisateur,
+        data.motDePasse
+      );
+      const user = userCredential.user;
 
-    // 1. Chercher dans la collection admins
-    const adminRef = doc(db, "admins", user.uid);
-    const adminSnap = await getDoc(adminRef);
+      // 1. Chercher dans la collection admins
+      const adminRef = doc(db, "admins", user.uid);
+      const adminSnap = await getDoc(adminRef);
 
-    if (adminSnap.exists()) {
-      // Si trouvé dans admins
-      const adminData = adminSnap.data();
-      localStorage.setItem("admin", JSON.stringify({ ...adminData, role: "admin" }));
-      toast.success("Connexion réussie en tant qu'admin principal");
-      navigate("/admin");
-      return;
+      if (adminSnap.exists()) {
+        const adminData = adminSnap.data();
+        localStorage.setItem(
+          "admin",
+          JSON.stringify({ ...adminData, role: "admin" })
+        );
+        toast.success("Connexion réussie ");
+        navigate("/admin", { replace: true });
+        return;
+      }
+
+      // 2. Chercher dans la collection users (admins secondaires ?)
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userRef);
+
+      if (userSnap.exists()) {
+        const userData = userSnap.data();
+        localStorage.setItem(
+          "admin",
+          JSON.stringify({ ...userData, role: "user" })
+        );
+        toast.success("Connexion réussie");
+        navigate("/admin", { replace: true });
+        return;
+      }
+
+      // Pas trouvé → pas droit admin
+      toast.error("Vous n'avez pas les droits administrateur");
+    } catch (error) {
+      console.error("Erreur de connexion :", error);
+      toast.error("Email ou mot de passe incorrect");
     }
+  };
 
-    // 2. Sinon chercher dans la collection users
-    const userRef = doc(db, "users", user.uid);
-    const userSnap = await getDoc(userRef);
-
-    if (userSnap.exists()) {
-      // Si trouvé dans users
-      const userData = userSnap.data();
-      localStorage.setItem("admin", JSON.stringify({ ...userData, role: "user" }));
-      toast.success("Connexion réussie en tant qu'admin");
-      navigate("/admin");
-      return;
-    }
-
-    // Si pas trouvé dans aucune collection
-    toast.error("Vous n'avez pas les droits administrateur");
-  } catch (error) {
-    console.error("Erreur de connexion :", error);
-    toast.error("Email ou mot de passe incorrect");
+  if (loadingRedirect) {
+    return <div>Chargement...</div>;
   }
-};
-
 
   return (
-    <Box sx={{ background: "linear-gradient(135deg, #E3F2FD, #ffffff)", minHeight: "100vh" }}>
+    <Box
+      sx={{
+        background: "linear-gradient(135deg, #E3F2FD, #ffffff)",
+        minHeight: "100vh",
+      }}
+    >
       <AppBar
         position="absolute"
         elevation={4}
@@ -92,7 +115,11 @@ const onSubmit = async (data) => {
         }}
       >
         <Toolbar className="position-relative px-3 d-flex justify-content-between w-100">
-          <IconButton edge="start" onClick={() => navigate("/")} sx={{ color: "#000" }}>
+          <IconButton
+            edge="start"
+            onClick={() => navigate("/")}
+            sx={{ color: "#000" }}
+          >
             <i className="bi bi-arrow-left" style={{ fontSize: "24px" }}></i>
           </IconButton>
 
@@ -169,10 +196,6 @@ const onSubmit = async (data) => {
             <Button variant="contained" sx={{ marginTop: 2 }} type="submit">
               Connexion
             </Button>
-            {/* <Typography paddingTop={2}>
-              Vous n'avez pas de compte ?{" "}
-              <Link to="/inscription">Cliquez ici</Link>
-            </Typography> */}
           </form>
         </Box>
       </Stack>
