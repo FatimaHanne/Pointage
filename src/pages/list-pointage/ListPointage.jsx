@@ -12,6 +12,7 @@ import {
   AppBar,
   Toolbar,
   IconButton,
+  TextField,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -19,6 +20,7 @@ import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../firebase";
 
 export default function ListPointage() {
+  const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
   const [pointages, setPointages] = useState([]);
   const [rolesParNumero, setRolesParNumero] = useState({});
@@ -33,23 +35,20 @@ export default function ListPointage() {
     };
   }
 
-  // 1. Charger tous les rôles par numéro depuis "ajout-pointeur"
   const fetchPointeurs = async () => {
     try {
       const snap = await getDocs(collection(db, "ajout-pointeur"));
       const data = snap.docs.map(doc => doc.data());
       const mapping = {};
       data.forEach(u => {
-        // Assure-toi que le champ s'appelle bien "numeroUtilisateur"
         mapping[u.numeroUtilisateur] = u.role;
       });
       setRolesParNumero(mapping);
     } catch (err) {
-      console.error("Erreur fetch pointeurs :", err);
+      console.error("Erreur fetch pointeurs :", err);
     }
   };
 
-  // 2. Charger les pointages du mois
   const fetchPointagesMois = async () => {
     try {
       const { start, end } = getStartAndEndOfMonth();
@@ -58,12 +57,11 @@ export default function ListPointage() {
       const filtered = all.filter(p => p.date >= start && p.date <= end);
       setPointages(filtered);
     } catch (err) {
-      console.error("Erreur fetch pointages :", err);
+      console.error("Erreur fetch pointages :", err);
     }
   };
 
   useEffect(() => {
-    // On charge d'abord les rôles, puis les pointages
     async function init() {
       await fetchPointeurs();
       await fetchPointagesMois();
@@ -71,7 +69,6 @@ export default function ListPointage() {
     init();
   }, []);
 
-  // Détermine le statut affiché (Admin vs Stagiaire) selon le rôle exact
   const getStatutAffiche = (numero) => {
     const role = rolesParNumero[numero];
     if (role === "admin" || role === "admin-principal") return "Admin";
@@ -79,12 +76,21 @@ export default function ListPointage() {
     return "Inconnu";
   };
 
-  // Détermine la couleur selon le statut
   const getColorStatut = (statut) => {
     if (statut === "Admin") return "green";
     if (statut === "Stagiaire") return "blue";
     return "gray";
   };
+
+  // 🔍 Filtrage des pointages selon la recherche
+  const pointagesFiltres = pointages.filter((p) => {
+    const term = searchTerm.toLowerCase();
+    return (
+      p.nom?.toLowerCase().includes(term) ||
+      p.numeroUtilisateur?.toLowerCase().includes(term) ||
+      p.phone?.toLowerCase().includes(term)
+    );
+  });
 
   return (
     <Box sx={{ background: "linear-gradient(135deg, #E3F2FD, #ffffff)", minHeight: "100vh" }}>
@@ -118,11 +124,21 @@ export default function ListPointage() {
           </div>
         </Toolbar>
       </AppBar>
+
       <Stack alignItems="center" justifyContent="center" p={4}>
         <Box width="90%">
-          {pointages.length === 0 ? (
+          <TextField
+            fullWidth
+            label="Rechercher par nom ou téléphone"
+            variant="outlined"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            sx={{ mb: 3 }}
+          />
+
+          {pointagesFiltres.length === 0 ? (
             <Typography color="gray" mt={2}>
-              Aucun pointage ce mois-ci.
+              Aucun pointage trouvé.
             </Typography>
           ) : (
             <TableContainer component={Paper}>
@@ -138,7 +154,7 @@ export default function ListPointage() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {pointages.map((p) => {
+                  {pointagesFiltres.map((p) => {
                     const statutAffiche = getStatutAffiche(p.numeroUtilisateur || p.phone);
                     return (
                       <TableRow key={p.id}>

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -33,6 +34,7 @@ export default function ListEtudiant() {
   const [employés, setEmployés] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [editData, setEditData] = useState({});
+  const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
 
   const normalizeNumber = (num) => {
@@ -72,6 +74,7 @@ export default function ListEtudiant() {
       NomPointeur: employé.NomPointeur,
       PrenomPointeur: employé.PrenomPointeur,
       numeroUtilisateur: employé.numeroUtilisateur,
+      phone: employé.numeroUtilisateur,
       role: employé.role,
     });
   };
@@ -91,12 +94,15 @@ export default function ListEtudiant() {
       });
 
       const role = adminMatch ? "admin" : "stagiaire";
-      const updatedData = { ...editData, role };
+      const updatedData = {
+        ...editData,
+        numeroUtilisateur: editData.phone,
+        role
+      };
 
       await updateDoc(doc(db, "ajout-pointeur", id), updatedData);
       setEmployés((prev) =>
         prev.map((emp) => (emp.id === id ? { ...emp, ...updatedData } : emp))
-
       );
       toast.success("Pointeur mis à jour !");
       setEditingId(null);
@@ -113,6 +119,16 @@ export default function ListEtudiant() {
       fetchEmployés();
     }
   }, []);
+
+  // Filtrage par numéro, nom ou prénom
+  const filteredEmployés = employés.filter((emp) => {
+    const query = searchTerm.toLowerCase();
+    return (
+      emp.numeroUtilisateur.toLowerCase().includes(query) ||
+      emp.NomPointeur.toLowerCase().includes(query) ||
+      emp.PrenomPointeur.toLowerCase().includes(query)
+    );
+  });
 
   return (
     <Box sx={{ background: "linear-gradient(135deg, #E3F2FD, #ffffff)", minHeight: "100vh" }}>
@@ -162,7 +178,17 @@ export default function ListEtudiant() {
           marginTop: 4,
         }}
       >
-        {employés && employés.length > 0 ? (
+        <TextField
+          label="Rechercher un numéro, nom ou prénom"
+          variant="outlined"
+          size="small"
+          fullWidth
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          sx={{ marginBottom: 2 }}
+        />
+
+        {filteredEmployés.length > 0 ? (
           <TableContainer component={Paper}>
             <Table>
               <TableHead>
@@ -176,7 +202,7 @@ export default function ListEtudiant() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {employés.map((employé) => (
+                {filteredEmployés.map((employé) => (
                   <TableRow key={employé.id}>
                     <TableCell>{employé.id}</TableCell>
                     <TableCell>
@@ -257,9 +283,10 @@ export default function ListEtudiant() {
             </Table>
           </TableContainer>
         ) : (
-          <Typography>Aucun pointeur ajouté</Typography>
+          <Typography align="center">Aucun pointeur trouvé</Typography>
         )}
       </Stack>
     </Box>
   );
 }
+
