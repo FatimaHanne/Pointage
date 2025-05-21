@@ -70,7 +70,7 @@ const onSubmit = async ({ phone }) => {
     // 🔍 Chercher l’utilisateur dans 'ajout-pointeur'
     const qPointeur = query(
       collection(db, "ajout-pointeur"),
-      where("numeroUtilisateur", "==", phone)
+      where("phone", "==", phone)
     );
     const resPointeur = await getDocs(qPointeur);
 

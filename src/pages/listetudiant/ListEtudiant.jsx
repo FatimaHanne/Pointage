@@ -124,7 +124,7 @@ export default function ListEtudiant() {
   const filteredEmployés = employés.filter((emp) => {
     const query = searchTerm.toLowerCase();
     return (
-      emp.numeroUtilisateur.toLowerCase().includes(query) ||
+      emp.phone.toLowerCase().includes(query) ||
       emp.NomPointeur.toLowerCase().includes(query) ||
       emp.PrenomPointeur.toLowerCase().includes(query)
     );
@@ -238,7 +238,7 @@ export default function ListEtudiant() {
                           size="small"
                         />
                       ) : (
-                        employé.numeroUtilisateur
+                        employé.phone
                       )}
                     </TableCell>
                     <TableCell>
