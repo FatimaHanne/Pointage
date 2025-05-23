@@ -113,17 +113,18 @@ const onSubmit = async ({ phone }) => {
       // 📌 Sortie
       const pointage = pointageDoc.data();
       if (!pointage.sortie) {
-        if (currentTime >= debutSortie && currentTime <= finSortie) {
-          await updateDoc(doc(db, "pointages", pointageDoc.id), {
-            sortie: now.toLocaleTimeString("fr-FR", {
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
-          });
-          toast.success("Sortie enregistrée !");
-        } else {
-          toast.error("La sortie est autorisée entre 15h00 et 18h00.");
+           if (!pointage.sortie) {
+            await updateDoc(doc(db, "pointages", pointageDoc.id), {
+              sortie: now.toLocaleTimeString("fr-FR", {
+                hour: "2-digit",
+                minute: "2-digit",
+              }),
+            });
+            toast.success("Sortie enregistrée !");
+          } else {
+          toast.error("Vous avez déjà pointé l'entrée et la sortie.");
         }
+
       } else {
         toast.error("Vous avez déjà pointé l'entrée et la sortie.");
       }

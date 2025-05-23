@@ -33,7 +33,54 @@ export default function AddPointage() {
     setEmployés(data);
   };
 
+// const onSubmit = async (data) => {
+//   try {
+//     const normalizeNumber = (num) => {
+//       if (!num) return "";
+//       return num.replace(/\D/g, "").replace(/^221/, "");
+//     };
+
+//     const normalizedPhone = normalizeNumber(data.phone);
+
+//     const adminSnapshot = await getDocs(collection(db, "admins"));
+
+//     let isAdmin = false;
+//     adminSnapshot.forEach((doc) => {
+//       const adminPhone = normalizeNumber(doc.data().numeroUtilisateur || "");
+//       if (normalizedPhone === adminPhone) {
+//         isAdmin = true;
+//       }
+//     });
+
+//     const role = isAdmin ? "admin" : "stagiaire";
+
+//     const q = query(collection(db, "ajout-pointeur"), where("numeroUtilisateur", "==", normalizedPhone));
+//     const doublonSnapshot = await getDocs(q);
+//     if (!doublonSnapshot.empty) {
+//       toast.error("Ce numéro est déjà enregistré");
+//       return;
+//     }
+
+//     const pointeurAvecRole = {
+//       NomPointeur: data.NomPointeur,
+//       PrenomPointeur: data.PrenomPointeur,
+//       numeroUtilisateur: normalizedPhone,
+//       role: role,
+//     };
+
+//     await addDoc(collection(db, "ajout-pointeur"), pointeurAvecRole);
+//     toast.success(`Ajouté avec succès comme ${role}`);
+//     reset();
+//     fetchEmployés();
+//     navigate("/Pointer");
+
+//   } catch (err) {
+//     console.error(err);
+//     toast.error("Une erreur est survenue");
+//   }
+// };
 const onSubmit = async (data) => {
+  console.log("Données reçues:", data);
   try {
     const normalizeNumber = (num) => {
       if (!num) return "";
@@ -41,9 +88,10 @@ const onSubmit = async (data) => {
     };
 
     const normalizedPhone = normalizeNumber(data.phone);
+    console.log("Téléphone normalisé:", normalizedPhone);
 
+    // Vérification admin
     const adminSnapshot = await getDocs(collection(db, "admins"));
-
     let isAdmin = false;
     adminSnapshot.forEach((doc) => {
       const adminPhone = normalizeNumber(doc.data().numeroUtilisateur || "");
@@ -51,11 +99,13 @@ const onSubmit = async (data) => {
         isAdmin = true;
       }
     });
+    console.log("Is admin ?", isAdmin);
 
-    const role = isAdmin ? "admin" : "stagiaire";
-
+    // Vérification doublon
     const q = query(collection(db, "ajout-pointeur"), where("numeroUtilisateur", "==", normalizedPhone));
     const doublonSnapshot = await getDocs(q);
+    console.log("Doublon ?", doublonSnapshot.empty === false);
+
     if (!doublonSnapshot.empty) {
       toast.error("Ce numéro est déjà enregistré");
       return;
@@ -65,17 +115,18 @@ const onSubmit = async (data) => {
       NomPointeur: data.NomPointeur,
       PrenomPointeur: data.PrenomPointeur,
       numeroUtilisateur: normalizedPhone,
-      role: role,
+      role: isAdmin ? "admin" : "stagiaire",
     };
+    console.log("Données à ajouter:", pointeurAvecRole);
 
     await addDoc(collection(db, "ajout-pointeur"), pointeurAvecRole);
-    toast.success(`Ajouté avec succès comme ${role}`);
+    toast.success(`Ajouté avec succès comme ${isAdmin ? "admin" : "stagiaire"}`);
     reset();
     fetchEmployés();
     navigate("/Pointer");
 
   } catch (err) {
-    console.error(err);
+    console.error("Erreur ajout pointeur:", err);
     toast.error("Une erreur est survenue");
   }
 };
